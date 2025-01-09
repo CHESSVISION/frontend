@@ -1,6 +1,6 @@
 <svg version="1.1"
      baseProfile="full"
-     width="2000" height="200"
+     width="1550" height="150"
      xmlns="http://www.w3.org/2000/svg">
 
     <!-- Define a chessboard pattern to use as the text fill -->
@@ -21,7 +21,7 @@
     </defs>
 
     <!-- Text with the chessboard pattern -->
-    <text x="0" y="200"
+    <text x="0" y="150"
           fill="url(#chessboard)"
           font-family="Arial Black"
           font-size="200"

@@ -1,7 +1,8 @@
-import type {Metadata} from "next";
+import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Image from "next/image";
+import NavBar from "@/app/NavBar";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -25,15 +26,23 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-        <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-        {children}
-        <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
+        <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+        {/*
+         We add flex + min-h-screen on the body so that
+         the footer stays at the bottom if desired,
+         and the middle area can grow/shrink.
+      */}
+        <body className="antialiased flex flex-col min-h-screen font-[family-name:var(--font-geist-mono)]">
+        <NavBar />
+
+        {/* Main content flexes to fill available space */}
+        <main className="flex-1">{children}</main>
+
+        {/* Footer at the bottom */}
+        <footer className="flex gap-6 flex-wrap items-center justify-center p-4 border-t dark:border-gray-700">
             <a
                 className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-                href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+                href="https://github.com/CHESSVISION/"
                 target="_blank"
                 rel="noopener noreferrer"
             >

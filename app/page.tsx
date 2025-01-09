@@ -4,16 +4,19 @@ import ImportButton from "@/app/ImportButton";
 export default function Home() {
     return (
         <div
-            className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+            className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
             <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-                <Image
-                    className="dark:invert"
-                    src="/chessvision.svg"
-                    alt="chessvision logo"
-                    width={360}
-                    height={76}
-                />
-                <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+                <div className="flex items-center">
+                    <Image
+                        className="dark:invert"
+                        src="/chessvision.svg"
+                        alt="chessvision logo"
+                        width={360}
+                        height={35}
+                    />
+                </div>
+
+                <ol className="list-inside list-decimal text-sm text-center sm:text-left">
                     <li className="mb-2">Get started by import your <b>videos</b>.</li>
                     <li>Enjoy the interactive game instantly.</li>
                 </ol>
@@ -22,7 +25,7 @@ export default function Home() {
                     <ImportButton/>
                     <a
                         className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-                        href="/videos"
+                        href="/games"
                         rel="noopener noreferrer"
                     >
                         Check videos

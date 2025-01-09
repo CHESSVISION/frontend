@@ -1,0 +1,45 @@
+<svg
+        width="200"
+        height="200"
+        viewBox="0 0 200 200"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-labelledby="chessboardTitle"
+        role="img"
+>
+    <title id="chessboardTitle">Chessboard</title>
+
+    <!-- Define a pattern that draws a 2×2 block (each square 25px).
+         This 50×50 pattern repeats across the 200×200 area,
+         creating an 8×8 board overall. -->
+    <defs>
+        <pattern
+                id="chessboard"
+                x="0"
+                y="0"
+                width="50"
+                height="50"
+                patternUnits="userSpaceOnUse"
+        >
+            <!-- Top-left square (white) -->
+            <rect x="0"  y="0"  width="25" height="25" fill="#FFFFFF" />
+
+            <!-- Top-right square (black) -->
+            <rect x="25" y="0"  width="25" height="25" fill="#000000" />
+
+            <!-- Bottom-left square (black) -->
+            <rect x="0"  y="25" width="25" height="25" fill="#000000" />
+
+            <!-- Bottom-right square (white) -->
+            <rect x="25" y="25" width="25" height="25" fill="#FFFFFF" />
+        </pattern>
+    </defs>
+
+    <!-- Fill the entire 200×200 space with the chessboard pattern -->
+    <rect
+            x="0"
+            y="0"
+            width="200"
+            height="200"
+            fill="url(#chessboard)"
+    />
+</svg>
