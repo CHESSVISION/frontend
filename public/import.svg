@@ -1,0 +1,30 @@
+<svg version="1.1"
+     xmlns="http://www.w3.org/2000/svg"
+     width="64"
+     height="64"
+     viewBox="0 0 64 64"
+     aria-labelledby="importIconTitle"
+     role="img">
+    <title id="importIconTitle">Import Symbol</title>
+
+    <!-- Downward arrow shaft -->
+    <path d="M32 10 L32 36"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="4"
+          stroke-linecap="round" />
+
+    <!-- Arrowhead -->
+    <path d="M22 26 L32 36 L42 26"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="4"
+          stroke-linecap="round" />
+
+    <!-- Tray line -->
+    <path d="M16 50 L48 50"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="4"
+          stroke-linecap="round" />
+</svg>
