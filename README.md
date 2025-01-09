@@ -3,18 +3,20 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
+### Pre-Installation 
+- npm 10.8.3
+- node 22.9.0
+
+Change directory to the project then ...
+```bash
+npm i
+
+npm run dev
+
+```
+
 
 First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
