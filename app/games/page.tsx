@@ -1,54 +1,80 @@
-"use client";
-import {useState} from "react";
+"use client"; // Needed for client-side interactivity in Next.js App Router
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import ImportButton from "@/app/ImportButton";
 
+interface Game {
+    id: number;
+    title: string;
+    description: string;
+    position: string;
+    moves: string[];
+}
+
 export default function GamesPage() {
-    // Example game data; in a real app you might fetch this from an API or database
-    const [games] = useState([
-        {id: 1, name: "Game #1", description: "First game description"},
-        {id: 2, name: "Game #2", description: "Second game description"},
-        {id: 3, name: "Game #3", description: "Third game description"},
-    ]);
+    const [igames, setIgames] = useState<Game[]>([]);
     const [chosenGameId, setChosenGameId] = useState<number | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchGames = async () => {
+            try {
+                const res = await fetch("http://127.0.0.1:8000/games", {
+                    method: "GET",
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Error: ${res.status} ${res.statusText}`);
+                }
+
+                const data: Game[] = await res.json();
+                setIgames(data);
+            } catch (err: any) {
+                console.error("Failed to fetch games:", err);
+                setError(err.message || "Failed to fetch games.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGames();
+    }, []);
+
+    if (loading) {
+        return <p className="text-center">Loading games...</p>;
+    }
+
+    if (error) {
+        return <p className="text-center text-red-500">Error: {error}</p>;
+    }
 
     return (
         <div className="max-w-3xl mx-auto p-8">
             <h1 className="text-2xl mb-4">Select a Game</h1>
             <ul className="space-y-2">
-                {games.map((game) => {
-                    return (
-                        <li
-                            key={game.id}
-                            className={`p-4 border border-gray-200 rounded hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors `}
-                        >
-                            <a
-                                href={`/games/game`}
-                                className="flex items-center justify-between"
-                            >
-                                <div>
-                                    <h2 className="font-semibold text-gray-800 dark:text-gray-100">
-                                        {game.name}
-                                    </h2>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                                        {game.description}
-                                    </p>
-                                </div>
-
-                                <Image
-                                    src="/greaterThan.svg"
-                                    alt="chosen icon"
-                                    width={16}
-                                    height={16}
-                                />
-
-                            </a>
-                        </li>
-                    );
-                })}
+                {igames.map((game) => (
+                    <li
+                        key={game.id}
+                        className="p-4 border border-gray-200 rounded hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors"
+                    >
+                        <a href={`/games/${game.id}`} className="flex items-center justify-between">
+                            <div>
+                                <h2 className="font-semibold text-gray-800 dark:text-gray-100">{game.title}</h2>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">{game.description}</p>
+                            </div>
+                            <Image
+                                src="/greaterThan.svg"
+                                alt="Navigate to game"
+                                width={16}
+                                height={16}
+                            />
+                        </a>
+                    </li>
+                ))}
             </ul>
             <div className="flex flex-row-reverse items-center py-2">
-                <ImportButton/>
+                <ImportButton />
             </div>
         </div>
     );
