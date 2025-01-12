@@ -7,7 +7,7 @@ export default function NavBar() {
             <div className="max-w-7xl mx-auto px-4 py-3 flex items-center">
 
                 {/* Left Column (flex-1) */}
-                <a className="flex-1" href="/">
+                <a className="flex-1" href="/public">
                     {/* Put your larger/left image here */}
                     <Image
                         src="/chessvision.svg"
@@ -33,7 +33,7 @@ export default function NavBar() {
                     <ul className="inline-flex items-center space-x-4">
                         <li>
                             <Link
-                                href="/"
+                                href="/public"
                                 className="text-gray-700 dark:text-gray-200 hover:underline"
                             >
                                 Game

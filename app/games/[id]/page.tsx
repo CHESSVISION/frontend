@@ -5,7 +5,7 @@
 import {useParams} from "next/navigation";
 import {useEffect, useState} from "react";
 import Image from "next/image";
-import Button from "@/app/games/[id]/Button"; // Corrected import path
+import Button from "@/components/Button"; // Corrected import path
 
 interface Game {
     id: number;

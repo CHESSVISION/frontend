@@ -1,7 +1,7 @@
 "use client"; // Needed for client-side interactivity in Next.js App Router
 import {useEffect, useState} from "react";
 import Image from "next/image";
-import ImportButton from "@/app/ImportButton";
+import ImportButton from "@/components/ImportButton";
 
 interface Game {
     id: number;
