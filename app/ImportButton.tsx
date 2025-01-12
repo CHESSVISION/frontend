@@ -1,7 +1,7 @@
 "use client"; // Needed for client-side interactivity in Next.js App Router
-import { useRef, useState } from "react";
+import {useRef, useState} from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation"; // Import useRouter
+import {useRouter} from "next/navigation"; // Import useRouter
 
 export default function ImportButton() {
     const router = useRouter(); // Initialize router

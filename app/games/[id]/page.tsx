@@ -2,8 +2,8 @@
 
 "use client";
 
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import {useParams} from "next/navigation";
+import {useEffect, useState} from "react";
 import Image from "next/image";
 import Button from "@/app/games/[id]/button"; // Corrected import path
 
@@ -17,7 +17,7 @@ interface Game {
 
 export default function GameDetailsPage() {
     const params = useParams();
-    const { id } = params; // Extract the game id from the URL
+    const {id} = params; // Extract the game id from the URL
 
     const [gameData, setGameData] = useState<Game | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -66,7 +66,8 @@ export default function GameDetailsPage() {
                     <h1 className="text-2xl mb-4">Analyzing {gameData.title}</h1>
                     <div className="flex flex-col md:flex-row">
                         {/* Left Side: Chessboard and Buttons */}
-                        <div className="border border-gray-300 dark:border-gray-700 rounded p-4 m-2 flex flex-col items-center">
+                        <div
+                            className="border border-gray-300 dark:border-gray-700 rounded p-4 m-2 flex flex-col items-center">
                             {/* Centered chessboard */}
                             <Image
                                 src="/chessboard.svg"
@@ -78,19 +79,20 @@ export default function GameDetailsPage() {
 
                             {/* Buttons row 1 */}
                             <div className="flex justify-center items-center gap-2 mt-4">
-                                <Button name={`Previous`} />
-                                <Button name={`Suggest`} />
-                                <Button name={`Next`} />
+                                <Button name={`Previous`}/>
+                                <Button name={`Suggest`}/>
+                                <Button name={`Next`}/>
                             </div>
 
                             {/* Buttons row 2 */}
                             <div className="flex justify-center items-center gap-2 mt-2">
-                                <Button name="Delete" />
+                                <Button name="Delete"/>
                             </div>
                         </div>
 
                         {/* Right Side: Game Data */}
-                        <div className="flex flex-col p-2 m-2 border border-gray-300 dark:border-gray-700 rounded w-full">
+                        <div
+                            className="flex flex-col p-2 m-2 border border-gray-300 dark:border-gray-700 rounded w-full">
                             {/* Game Title */}
                             <h2 className="text-xl font-bold mb-2">{gameData.title}</h2>
 
@@ -108,14 +110,14 @@ export default function GameDetailsPage() {
                                 ))}
                             </ul>
                             <div className="ml-auto mt-auto p-2">
-                                <Button name="Export" />
+                                <Button name="Export"/>
                             </div>
                         </div>
                     </div>
 
                     {/* Back Button */}
                     <div className="flex justify-end gap-2 m-2">
-                        <Button name="Back" uri="/games" />
+                        <Button name="Back" uri="/games"/>
                     </div>
                 </>
             ) : (

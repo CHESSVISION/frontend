@@ -1,13 +1,12 @@
 "use client"; // Needed for client-side interactivity in Next.js App Router
-import { useRef } from "react";
-import Image from "next/image";
+import {useRef} from "react";
 
-interface ButtonProps{
+interface ButtonProps {
     name: string;
     uri: string;
 }
 
-export default function Button({ name, uri }: ButtonProps) {
+export default function Button({name, uri}: ButtonProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (

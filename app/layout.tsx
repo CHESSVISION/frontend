@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type {Metadata} from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Image from "next/image";
@@ -33,7 +33,7 @@ export default function RootLayout({
          and the middle area can grow/shrink.
       */}
         <body className="antialiased flex flex-col min-h-screen font-[family-name:var(--font-geist-mono)]">
-        <NavBar />
+        <NavBar/>
 
         {/* Main content flexes to fill available space */}
         <main className="flex-1">{children}</main>

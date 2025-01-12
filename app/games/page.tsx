@@ -1,5 +1,5 @@
 "use client"; // Needed for client-side interactivity in Next.js App Router
-import { useState, useEffect } from "react";
+import {useEffect, useState} from "react";
 import Image from "next/image";
 import ImportButton from "@/app/ImportButton";
 
@@ -74,7 +74,7 @@ export default function GamesPage() {
                 ))}
             </ul>
             <div className="flex flex-row-reverse items-center py-2">
-                <ImportButton />
+                <ImportButton/>
             </div>
         </div>
     );
