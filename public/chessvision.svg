@@ -7,16 +7,16 @@
     <defs>
         <pattern id="chessboard"
                  x="0" y="0"
-                 width="10" height="10"
+                 width="20" height="20"
                  patternUnits="userSpaceOnUse">
             <!-- Black square -->
-            <rect x="0" y="0" width="5" height="5" fill="#000000" />
+            <rect x="0" y="0" width="10" height="10" fill="#000000" />
             <!-- White square -->
-            <rect x="5" y="0" width="5" height="5" fill="#FFFFFF" />
+            <rect x="10" y="0" width="10" height="10" fill="#FFFFFF" />
             <!-- White square -->
-            <rect x="0" y="5" width="5" height="5" fill="#FFFFFF" />
+            <rect x="0" y="10" width="10" height="10" fill="#FFFFFF" />
             <!-- Black square -->
-            <rect x="5" y="5" width="5" height="5" fill="#000000" />
+            <rect x="10" y="10" width="10" height="10" fill="#000000" />
         </pattern>
     </defs>
 

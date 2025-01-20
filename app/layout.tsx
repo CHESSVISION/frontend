@@ -2,17 +2,19 @@ import type {Metadata} from "next";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
-
+import {geistMono, geistSans} from "@/app/fonts";
 export const metadata: Metadata = {
     title: "CHESSVISION",
 };
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
     return (
-        <html lang="en">
+        <html lang="en" className={`${geistMono.variable} ${geistSans}`}>
             <body>
                 <NavBar/>
-                <main>{children}</main>
+                <main>
+                    {children}
+                </main>
                 <Footer/>
             </body>
         </html>

@@ -15,5 +15,13 @@ body {
 }
 
 main {
-    @apply flex-1
+    @apply flex flex-1
+}
+
+ol {
+    @apply space-y-1
+}
+
+footer {
+    @apply flex gap-6 flex-wrap items-center justify-center p-4 border-t dark:border-gray-700
 }

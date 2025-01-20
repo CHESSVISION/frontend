@@ -7,7 +7,7 @@ export default function NavBar() {
             <div className="max-w-7xl mx-auto px-4 py-3 flex items-center">
 
                 {/* Left Column (flex-1) */}
-                <a className="flex-1" href="/public">
+                <a className="flex-1" href="/">
                     {/* Put your larger/left image here */}
                     <Image
                         src="/chessvision.svg"
@@ -20,12 +20,15 @@ export default function NavBar() {
                 {/* Middle Column (flex-1) - optional */}
                 <div className="flex text-center">
                     {/* Maybe a smaller image or site title in the center */}
-                    <Image
-                        src="/favicon.ico"
-                        alt="another logo"
-                        width={40}
-                        height={40}
-                    />
+                    <a className="flex-1" href="/">
+
+                        <Image
+                            src="/favicon.ico"
+                            alt="another logo"
+                            width={40}
+                            height={40}
+                        />
+                    </a>
                 </div>
 
                 {/* Right Column (flex-1) */}
@@ -33,7 +36,7 @@ export default function NavBar() {
                     <ul className="inline-flex items-center space-x-4">
                         <li>
                             <Link
-                                href="/public"
+                                href="/"
                                 className="text-gray-700 dark:text-gray-200 hover:underline"
                             >
                                 Game

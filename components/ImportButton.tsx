@@ -3,7 +3,7 @@ import {useRef, useState} from "react";
 import Image from "next/image";
 import {useRouter} from "next/navigation"; // Import useRouter
 
-export default function ImportButton() {
+const ImportButton: React.FC = () => {
     const router = useRouter(); // Initialize router
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState<boolean>(false);
@@ -99,3 +99,5 @@ export default function ImportButton() {
         </div>
     );
 }
+
+export default ImportButton;
