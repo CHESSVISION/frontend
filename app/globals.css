@@ -5,17 +5,15 @@
 :root {
     --background: #ffffff;
     --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
-    }
+    --font-geist-sans: 'Geist Sans', sans-serif;
+    --font-geist-mono: 'Geist Mono', monospace;
+    font-family: var(--font-geist-mono);
 }
 
 body {
-    color: var(--foreground);
-    background: var(--background);
-    font-family: Arial, Helvetica, sans-serif;
+    @apply flex flex-col min-h-screen antialiased;
+}
+
+main {
+    @apply flex-1
 }
