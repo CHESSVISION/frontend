@@ -3,6 +3,7 @@ import "./globals.css";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import {geistMono, geistSans} from "@/app/fonts";
+
 export const metadata: Metadata = {
     title: "CHESSVISION",
 };
