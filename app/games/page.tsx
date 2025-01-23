@@ -12,8 +12,7 @@ interface Game {
 }
 
 export default function GamesPage() {
-    const [igames, setIgames] = useState<Game[]>([]);
-    const [chosenGameId, setChosenGameId] = useState<number | null>(null);
+    const [games, setGames] = useState<Game[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +28,7 @@ export default function GamesPage() {
                 }
 
                 const data: Game[] = await res.json();
-                setIgames(data);
+                setGames(data);
             } catch (err: any) {
                 console.error("Failed to fetch games:", err);
                 setError(err.message || "Failed to fetch games.");
@@ -50,33 +49,31 @@ export default function GamesPage() {
     }
 
     return (
-        <div className="w-full">
-            <div className="max-w-3xl mx-auto">
-                <h1 className="text-2xl m-4 ml-0">Select a Game</h1>
-                <ul className="space-y-2">
-                    {igames.map((game) => (
-                        <li
-                            key={game.id}
-                            className="p-4 border border-gray-200 rounded hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors"
-                        >
-                            <a href={`/games/${game.id}`} className="flex items-center justify-between">
-                                <div>
-                                    <h2 className="font-semibold text-gray-800 dark:text-gray-100">{game.title}</h2>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300">{game.description}</p>
-                                </div>
-                                <Image
-                                    src="/greaterThan.svg"
-                                    alt="Navigate to game"
-                                    width={16}
-                                    height={16}
-                                />
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-                <div className="flex flex-row-reverse items-center py-2">
-                    <ImportButton/>
-                </div>
+        <div className="w-full max-w-3xl mx-auto mt-4">
+            <h1 className="text-2xl mb-4 ml-0">Select a Game</h1>
+            <ul className="space-y-2">
+                {games.map((game) => (
+                    <li
+                        key={game.id}
+                        className="p-4 border border-gray-200 rounded hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors"
+                    >
+                        <a href={`/games/${game.id}`} className="flex items-center justify-between">
+                            <div>
+                                <h2 className="font-semibold text-gray-800 dark:text-gray-100">{game.title}</h2>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">{game.description}</p>
+                            </div>
+                            <Image
+                                src="/greaterThan.svg"
+                                alt="Navigate to game"
+                                width={16}
+                                height={16}
+                            />
+                        </a>
+                    </li>
+                ))}
+            </ul>
+            <div className="flex flex-row-reverse items-center py-2">
+                <ImportButton/>
             </div>
         </div>
     );
