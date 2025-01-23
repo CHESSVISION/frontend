@@ -1,51 +1,17 @@
-"use client"; // Needed for client-side interactivity in Next.js App Router
-import {useEffect, useState} from "react";
 import Image from "next/image";
 import ImportButton from "@/components/ImportButton";
+import Link from "next/link";
+import GameInterface from "@/interfaces/GameInterface";
 
-interface Game {
-    id: number;
-    title: string;
-    description: string;
-    position: string;
-    moves: string[];
-}
 
-export default function GamesPage() {
-    const [games, setGames] = useState<Game[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+export default async function GamesPage() {
+    let games: GameInterface[] | null = null;
 
-    useEffect(() => {
-        const fetchGames = async () => {
-            try {
-                const res = await fetch("http://127.0.0.1:8000/games", {
-                    method: "GET",
-                });
-
-                if (!res.ok) {
-                    throw new Error(`Error: ${res.status} ${res.statusText}`);
-                }
-
-                const data: Game[] = await res.json();
-                setGames(data);
-            } catch (err: any) {
-                console.error("Failed to fetch games:", err);
-                setError(err.message || "Failed to fetch games.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchGames();
-    }, []);
-
-    if (loading) {
-        return <p className="text-center">Loading games...</p>;
-    }
-
-    if (error) {
-        return <p className="text-center text-red-500">Error: {error}</p>;
+    try {
+        const response = await fetch("http://127.0.0.1:8000/games");
+        games = await response.json();
+    } catch (err) {
+        console.error("Failed to fetch games:", err);
     }
 
     return (
@@ -57,7 +23,7 @@ export default function GamesPage() {
                         key={game.id}
                         className="p-4 border border-gray-200 rounded hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors"
                     >
-                        <a href={`/games/${game.id}`} className="flex items-center justify-between">
+                        <Link href={`/games/${game.id}`} className="flex items-center justify-between">
                             <div>
                                 <h2 className="font-semibold text-gray-800 dark:text-gray-100">{game.title}</h2>
                                 <p className="text-sm text-gray-600 dark:text-gray-300">{game.description}</p>
@@ -68,7 +34,7 @@ export default function GamesPage() {
                                 width={16}
                                 height={16}
                             />
-                        </a>
+                        </Link>
                     </li>
                 ))}
             </ul>

@@ -3,6 +3,8 @@ import "./globals.css";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import {geistMono, geistSans} from "@/app/fonts";
+import React, {Suspense} from "react";
+import Loading from "@/app/loading";
 
 export const metadata: Metadata = {
     title: "CHESSVISION",
@@ -13,9 +15,11 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
         <html lang="en" className={`${geistMono.variable} ${geistSans}`}>
             <body>
                 <NavBar/>
-                <main>
-                    {children}
-                </main>
+                    <main>
+                        <Suspense fallback={<Loading />}>
+                            <Loading/>
+                        </Suspense>
+                    </main>
                 <Footer/>
             </body>
         </html>

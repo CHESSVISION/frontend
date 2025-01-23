@@ -1,11 +1,6 @@
-export interface Badge{
-    href: string;
-    src: string;
-    alt: string;
-    text: string;
-}
+import BadgeInterface from "@/interfaces/BadgeInterface";
 
-export const all_badge: Badge[] = [
+export const all_badge: BadgeInterface[] = [
     {
         href: "https://github.com/CHESSVISION/",
         src: "/github.svg",

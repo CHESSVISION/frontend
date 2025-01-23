@@ -25,3 +25,29 @@ ol {
 footer {
     @apply flex gap-6 flex-wrap items-center justify-center p-4 border-t dark:border-gray-700
 }
+/* styles/LoadingOverlay.css */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.8); /* Light white background */
+    z-index: 1000;
+}
+
+.favicon-shadow {
+    width: 100px;
+    height: 100px;
+    background-image: url('/favicon.ico');
+    background-size: cover;
+    animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}

@@ -1,5 +1,3 @@
-"use client"; // Needed for client-side interactivity in Next.js App Router
-
 import React from "react";
 
 interface ButtonProps {

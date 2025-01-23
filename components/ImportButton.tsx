@@ -1,21 +1,19 @@
-"use client"; // Needed for client-side interactivity in Next.js App Router
+"use client";
 import {useRef, useState} from "react";
 import Image from "next/image";
-import {useRouter} from "next/navigation"; // Import useRouter
+import {useRouter} from "next/navigation";
 
 const ImportButton: React.FC = () => {
-    const router = useRouter(); // Initialize router
+    const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    // Trigger the hidden file input when the button is clicked
     const handleButtonClick = () => {
         fileInputRef.current?.click();
     };
 
-    // Handle the selected file
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (!files || files.length === 0) return;
@@ -24,29 +22,28 @@ const ImportButton: React.FC = () => {
         console.log("Selected video file:", file);
 
         const formData = new FormData();
-        formData.append("video", file); // Ensure the key matches FastAPI's parameter
+        formData.append("video", file);
 
         try {
             setUploading(true);
             setError(null);
             setSuccess(null);
 
-            const response = await fetch("http://127.0.0.1:8000/games", { // Corrected IP and URL
+            const response = await fetch("http://127.0.0.1:8000/games", {
                 method: "POST",
                 body: formData,
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || "Something went wrong!"); // Changed from 'message' to 'detail' based on FastAPI
+                throw new Error(errorData.detail || "Something went wrong!");
             }
 
             const data = await response.json();
             console.log("Upload successful:", data);
             setSuccess("Video uploaded successfully!");
 
-            // Redirect to the specific [id] details page using the returned 'id'
-            router.push(`/games/${data.id}`); // Ensure 'id' is present in the response
+            router.push(`/games/${data.id}`);
         } catch (err: any) {
             console.error("Upload failed:", err);
             setError(err.message || "An error occurred during upload.");
@@ -60,7 +57,6 @@ const ImportButton: React.FC = () => {
 
     return (
         <div>
-            {/* Styled button that triggers file input */}
             <button
                 type="button"
                 onClick={handleButtonClick}
@@ -80,7 +76,6 @@ const ImportButton: React.FC = () => {
                 {uploading ? "Uploading..." : "Import now"}
             </button>
 
-            {/* Hidden file input for selecting video files */}
             <input
                 ref={fileInputRef}
                 type="file"
@@ -89,7 +84,6 @@ const ImportButton: React.FC = () => {
                 onChange={handleFileChange}
             />
 
-            {/* Display success or error messages */}
             {success && (
                 <p className="mt-2 text-green-600 dark:text-green-400">{success}</p>
             )}
