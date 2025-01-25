@@ -1,10 +1,11 @@
 "use client";
 import React, {useEffect, useState} from "react";
-import {useParams} from "next/navigation";
+import {redirect, useParams} from "next/navigation";
 import Button from "@/components/Button";
 import MyChessboard from "@/components/Chessboard";
 import Loading from "@/app/loading";
 import GameInterface from "@/interfaces/GameInterface";
+import {router} from "next/client";
 
 export default function GamePage() {
     const {id} = useParams<{ id: string }>();
@@ -23,6 +24,10 @@ export default function GamePage() {
         }
     }
 
+    const gamesNavigate = () => {
+        redirect("/games")
+    }
+
     useEffect(() => {
         fetch(`http://127.0.0.1:8000/games/${id}`)
             .then((response) => {
@@ -39,7 +44,7 @@ export default function GamePage() {
     }
 
     return (
-        <div className="w-full max-w-3xl mx-auto gap-4 mt-4 flex flex-col">
+        <div className="w-full max-w-3xl mx-auto gap-4 py-4 flex flex-col">
             <h1 className="text-2xl ">Analyzing {game.title}</h1>
             <div className="border border-gray-300 rounded flex flex-col items-center bg-gray-50 gap-4 p-4">
                 <MyChessboard position={game.fen_positions[state]}/>
@@ -71,7 +76,7 @@ export default function GamePage() {
             </div>
 
             <div className="flex justify-end ">
-                <Button name="Back"/>
+                <Button name="All Games" command={gamesNavigate}/>
             </div>
         </div>
     );
