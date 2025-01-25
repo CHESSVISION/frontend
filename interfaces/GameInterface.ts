@@ -2,6 +2,6 @@ export default interface GameInterface {
     id: number;
     title: string;
     description: string;
-    position: string;
+    fen_positions: string[];
     moves: string[];
 }

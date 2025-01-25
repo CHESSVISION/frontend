@@ -1,66 +1,77 @@
-import Image from "next/image";
+"use client";
+import React, {useEffect, useState} from "react";
+import {useParams} from "next/navigation";
 import Button from "@/components/Button";
+import MyChessboard from "@/components/Chessboard";
+import Loading from "@/app/loading";
 import GameInterface from "@/interfaces/GameInterface";
 
-export default async function GamePage({params}: { params: { id: string } }) {
-    const {id} = params;
-    let game: GameInterface | null = null;
+export default function GamePage() {
+    const {id} = useParams<{ id: string }>();
+    const [state, setState] = useState<number>(0);
+    const [game, setGame] = useState<GameInterface | null>(null);
 
-    try {
-        const response = await fetch(`http://127.0.0.1:8000/games/${id}`);
-        game = await response.json();
-    } catch (error) {
-        console.error("Failed to fetch games:", error);
+    const handleNextButton = () => {
+        if (state < game!.fen_positions.length - 1) {
+            setState(prevState => (prevState + 1));
+        }
+    }
+
+    const handlePreviousButton = () => {
+        if (state > 0) {
+            setState(prevState => (prevState - 1));
+        }
+    }
+
+    useEffect(() => {
+        fetch(`http://127.0.0.1:8000/games/${id}`)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => setGame(data))
+    }, [id]);
+
+    if (!game) {
+        return <Loading/>;
     }
 
     return (
-        <div className="w-full max-w-3xl mx-auto gap-4 mt-4">
-            <h1 className="text-2xl mb-4">Analyzing {game.title}</h1>
-            <div className="flex flex-col md:flex-row">
-                <div
-                    className="border border-gray-300 dark:border-gray-700 rounded p-4 m-2 flex flex-col items-center">
-                    <Image
-                        src="/chessboard.svg"
-                        alt="Chessboard"
-                        width={400}
-                        height={400}
-                        className="object-cover"
-                    />
+        <div className="w-full max-w-3xl mx-auto gap-4 mt-4 flex flex-col">
+            <h1 className="text-2xl ">Analyzing {game.title}</h1>
+            <div className="border border-gray-300 rounded flex flex-col items-center bg-gray-50 gap-4 p-4">
+                <MyChessboard position={game.fen_positions[state]}/>
 
-                    <div className="flex justify-center items-center gap-2 mt-4">
-                        <Button name={`Previous`}/>
-                        <Button name={`Suggest`}/>
-                        <Button name={`Next`}/>
-                    </div>
-
-                    <div className="flex justify-center items-center gap-2 mt-2">
-                        <Button name="Delete"/>
-                    </div>
-                </div>
-
-                <div
-                    className="flex flex-col p-2 m-2 border border-gray-300 dark:border-gray-700 rounded w-full">
-                    <h2 className="text-xl font-bold mb-2">{game.title}</h2>
-
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                        {game.description}
-                    </p>
-
-                    <ul className="list-decimal list-inside space-y-1">
-                        {game.moves.map((move, index) => (
-                            <li key={index} className="text-sm">
-                                {move}
-                            </li>
-                        ))}
-                    </ul>
-                    <div className="ml-auto mt-auto p-2">
-                        <Button name="Export"/>
-                    </div>
+                <div className="flex justify-center gap-2">
+                    <Button name="Previous" command={handlePreviousButton}/>
+                    <Button name="Suggest"/>
+                    <Button name="Next" command={handleNextButton}/>
                 </div>
             </div>
 
-            <div className="flex justify-end gap-2 m-2">
-                <Button name="Back" uri="/games"/>
+            <div className="flex flex-col border border-gray-300 rounded gap-4 p-4">
+                <h2 className="text-xl font-bold mb-2">{game.title}</h2>
+
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    {game.description}
+                </p>
+
+                <ul className="list-decimal list-inside space-y-1">
+                    {game.moves.map((move, index) => (
+                        <li key={index} className="text-sm">
+                            {move}
+                        </li>
+                    ))}
+                </ul>
+                <div className="ml-auto mt-auto p-2">
+                    <Button name="Export"/>
+                </div>
+            </div>
+
+            <div className="flex justify-end ">
+                <Button name="Back"/>
             </div>
         </div>
     );
