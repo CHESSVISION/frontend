@@ -1,3 +1,4 @@
+'use server';
 import Image from "next/image";
 import ImportButton from "@/components/ImportButton";
 import Link from "next/link";
