@@ -46,7 +46,7 @@ export default function GamePage() {
     return (
         <div className="w-full max-w-3xl mx-auto gap-4 py-4 flex flex-col">
             <h1 className="text-2xl ">Analyzing {game.title}</h1>
-            <div className="border border-gray-300 rounded flex flex-col items-center bg-gray-50 gap-4 p-4">
+            <div className="border border-gray-300 rounded flex flex-col items-center gap-4 p-4">
                 <MyChessboard position={game.fen_positions[state]}/>
 
                 <div className="flex justify-center gap-2">
