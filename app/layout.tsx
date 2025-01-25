@@ -17,7 +17,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
                 <NavBar/>
                     <main>
                         <Suspense fallback={<Loading />}>
-                            <Loading/>
+                            {children}
                         </Suspense>
                     </main>
                 <Footer/>
