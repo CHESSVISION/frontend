@@ -11,7 +11,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ socketUrl }) => {
     const decoderRef = useRef<DecoderManager | null>(null);
 
     const websocket = new WebSocket(socketUrl);
+    websocket.binaryType = 'arraybuffer';
+
+    websocket.onopen = () => {
+        console.log("websocket open");
+    }
+
     websocket.onmessage = (event: MessageEvent) => {
+        const nalUnitType = event.data[0] & 0x1F;
+        console.log(`Received NAL unit type: ${nalUnitType}`);
+
         const data = new Uint8Array(event.data);
         decoderRef.current?.decode(data);
     }
