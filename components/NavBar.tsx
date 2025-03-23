@@ -3,37 +3,36 @@ import Link from "next/link";
 
 export default function NavBar() {
     return (
-        <header className="w-full bg-white dark:bg-gray-900 shadow">
-            <div className="max-w-7xl mx-auto px-4 py-3 flex items-center">
-                <Link className="flex-1" href="/">
+        <header className="w-full bg-[#1A1A1A] shadow-md border-b border-gray-700">
+            <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                {/* Logo and Home Link */}
+                <Link href="/" className="flex items-center gap-2">
                     <Image
                         src="/chessvision.svg"
-                        alt="chessvision Logo"
-                        width={200}
-                        height={19}
+                        alt="CHESSVISION Logo"
+                        width={180}
+                        height={24}
+                        className="object-contain"
                     />
                 </Link>
 
-                <div className="flex text-center">
-                    <Link className="flex-1" href="/">
+                {/* Right side: links or icon */}
+                <div className="flex items-center space-x-6">
+                    <Link href="/" className="text-white text-sm hover:text-[#FDBF2C] transition">
+                        Game
+                    </Link>
+
+                    {/* Optional Icon or Logo */}
+                    <Link href="/">
                         <Image
                             src="/favicon.ico"
-                            alt="another logo"
-                            width={40}
-                            height={40}
+                            alt="ChessVision Icon"
+                            width={32}
+                            height={32}
+                            className="rounded"
                         />
                     </Link>
                 </div>
-
-                <nav className="flex-1 text-right">
-                    <ul className="inline-flex items-center space-x-4">
-                        <li>
-                            <Link href="/" className="text-gray-700 dark:text-gray-200 hover:underline">
-                                Game
-                            </Link>
-                        </li>
-                    </ul>
-                </nav>
             </div>
         </header>
     );

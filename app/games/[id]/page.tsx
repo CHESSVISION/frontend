@@ -34,7 +34,6 @@ const fenToBoard = (fen: string): string[][] => {
     );
 };
 
-// Convert moves like "e2e4" to standard chess notation using the current board
 const convertMoveToChessNotation = (move: string, board: string[][]): string => {
     const fromFile = move.charCodeAt(0) - "a".charCodeAt(0);
     const fromRank = 8 - parseInt(move[1]);
@@ -42,21 +41,30 @@ const convertMoveToChessNotation = (move: string, board: string[][]): string => 
     const toRank = 8 - parseInt(move[3]);
 
     const piece = board[fromRank][fromFile];
-    const targetPiece = board[toRank][toFile];
-
-    const pieceSymbol = pieceSymbols[piece] || "";
-    const captureSymbol = targetPiece.trim() !== "" ? "x" : "";
     const toSquare = move.slice(2, 4);
 
-    // Pawn captures (e.g., exd5)
+    // 🏰 Castling logic FIRST (before looking at captures)
+    if (piece === 'K' && (move === 'e1h1' || move === 'e1g1')) return 'O-O';
+    if (piece === 'K' && (move === 'e1a1' || move === 'e1c1')) return 'O-O-O';
+    if (piece === 'k' && (move === 'e8h8' || move === 'e8g8')) return 'O-O';
+    if (piece === 'k' && (move === 'e8a8' || move === 'e8c8')) return 'O-O-O';
+
+    const targetPiece = board[toRank][toFile];
+    const pieceSymbol = pieceSymbols[piece] || "";
+    const captureSymbol = targetPiece.trim() !== "" ? "x" : "";
+
+    // ♟️ Pawn moves
     if (pieceSymbol === "") {
         if (captureSymbol) {
             return `${move[0]}x${toSquare}`;
         }
         return `${toSquare}`;
     }
+
+    // Normal piece move
     return `${pieceSymbol}${captureSymbol}${toSquare}`;
 };
+
 
 export default function GamePage() {
     const { id } = useParams<{ id: string }>();
