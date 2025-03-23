@@ -1,12 +1,12 @@
 "use client";
-import {useRef, useState} from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const ImportButton: React.FC = () => {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [uploading, setUploading] = useState<boolean>(false);
+    const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
@@ -19,8 +19,6 @@ const ImportButton: React.FC = () => {
         if (!files || files.length === 0) return;
 
         const file = files[0];
-        console.log("Selected video file:", file);
-
         const formData = new FormData();
         formData.append("video", file);
 
@@ -36,17 +34,15 @@ const ImportButton: React.FC = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || "Something went wrong!");
+                throw new Error(errorData.detail || "Upload failed.");
             }
 
             const data = await response.json();
-            console.log("Upload successful:", data);
             setSuccess("Video uploaded successfully!");
-
             router.push(`/games/${data.id}`);
         } catch (err: any) {
             console.error("Upload failed:", err);
-            setError(err.message || "An error occurred during upload.");
+            setError(err.message || "An error occurred.");
         } finally {
             setUploading(false);
             if (fileInputRef.current) {
@@ -56,24 +52,21 @@ const ImportButton: React.FC = () => {
     };
 
     return (
-        <div>
+        <div className="flex flex-col items-start gap-2">
             <button
                 type="button"
                 onClick={handleButtonClick}
-                className="rounded-full border border-solid border-transparent transition-colors
-                           flex items-center justify-center bg-foreground text-background gap-2
-                           hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base
-                           h-10 sm:h-12 px-4 sm:px-5"
-                disabled={uploading} // Disable button while uploading
+                className="flex items-center gap-2 bg-[#2B2B2B] hover:bg-[#403D39] text-white text-sm font-medium px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={uploading}
             >
                 <Image
-                    className="dark:invert"
                     src="/import.svg"
-                    alt="import icon"
-                    width={20}
-                    height={20}
+                    alt="Import Icon"
+                    width={18}
+                    height={18}
+                    className="dark:invert"
                 />
-                {uploading ? "Uploading..." : "Import now"}
+                {uploading ? "Uploading..." : "Import Now"}
             </button>
 
             <input
@@ -85,13 +78,13 @@ const ImportButton: React.FC = () => {
             />
 
             {success && (
-                <p className="mt-2 text-green-600 dark:text-green-400">{success}</p>
+                <p className="text-sm text-green-400">{success}</p>
             )}
             {error && (
-                <p className="mt-2 text-red-600 dark:text-red-400">{error}</p>
+                <p className="text-sm text-red-400">{error}</p>
             )}
         </div>
     );
-}
+};
 
 export default ImportButton;

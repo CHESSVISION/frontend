@@ -20,8 +20,8 @@ export default function Home() {
             </ol>
 
             <div className="flex items-center gap-4">
-                <ImportButton/>
-                <Link className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
+                <ImportButton />
+                <Link className="flex items-center gap-2 bg-[#2B2B2B] hover:bg-[#403D39] text-white text-sm font-medium px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                     href="/games"
                     rel="noopener noreferrer"
                 >
