@@ -106,20 +106,21 @@ export default function GamePage() {
         }
     }, [state, game]);
 
-    // 3. Fetch best moves from Lichess
     const fetchPossibleMoves = async (fen: string) => {
         try {
             const response = await fetch(`https://lichess.org/api/cloud-eval?fen=${fen}`);
             const data = await response.json();
 
             if (data.pvs) {
-                setPossibleMoves(
-                    data.pvs.map((pv: any) => ({
-                        moves: pv.moves.split(" "),
-                        cp: pv.cp || 0,
-                    }))
-                );
-                setEvaluation(data.pvs[0].cp);
+                const top3 = data.pvs.slice(0, 3).map((pv: any) => ({
+                    moves: pv.moves.split(" "),
+                    cp: pv.cp ?? 0, // use ?? to catch 0 or undefined
+                }));
+
+                const maxEval = Math.max(...top3.map((m) => m.cp));
+
+                setPossibleMoves(top3);
+                setEvaluation(maxEval);
             } else {
                 setPossibleMoves([]);
                 setEvaluation(0);
@@ -130,6 +131,7 @@ export default function GamePage() {
             setEvaluation(0);
         }
     };
+
 
     // 4. Navigation handlers
     const handleNextButton = () => {
