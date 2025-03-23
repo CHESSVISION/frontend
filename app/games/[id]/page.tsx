@@ -1,77 +1,333 @@
 "use client";
-import React, {useEffect, useState} from "react";
-import {useParams} from "next/navigation";
+
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Button from "@/components/Button";
 import MyChessboard from "@/components/Chessboard";
 import Loading from "@/app/loading";
-import GameInterface from "@/interfaces/GameInterface";
+import { FaStepBackward, FaStepForward, FaPlay, FaBackward, FaForward } from "react-icons/fa";
+import { Chess } from "chess.js";
+
+// Helper map for chess pieces
+const pieceSymbols: Record<string, string> = {
+    p: "", // Pawn
+    n: "♘",
+    b: "♗",
+    r: "♖",
+    q: "♕",
+    k: "♔",
+    P: "",
+    N: "♞",
+    B: "♝",
+    R: "♜",
+    Q: "♛",
+    K: "♚",
+};
+
+// Convert FEN to a 2D board array
+const fenToBoard = (fen: string): string[][] => {
+    const rows = fen.split(" ")[0].split("/");
+    return rows.map((row) =>
+        row
+            .replace(/\d/g, (digit) => " ".repeat(parseInt(digit)))
+            .split("")
+    );
+};
+
+// Convert moves like "e2e4" to standard chess notation using the current board
+const convertMoveToChessNotation = (move: string, board: string[][]): string => {
+    const fromFile = move.charCodeAt(0) - "a".charCodeAt(0);
+    const fromRank = 8 - parseInt(move[1]);
+    const toFile = move.charCodeAt(2) - "a".charCodeAt(0);
+    const toRank = 8 - parseInt(move[3]);
+
+    const piece = board[fromRank][fromFile];
+    const targetPiece = board[toRank][toFile];
+
+    const pieceSymbol = pieceSymbols[piece] || "";
+    const captureSymbol = targetPiece.trim() !== "" ? "x" : "";
+    const toSquare = move.slice(2, 4);
+
+    // Pawn captures (e.g., exd5)
+    if (pieceSymbol === "") {
+        if (captureSymbol) {
+            return `${move[0]}x${toSquare}`;
+        }
+        return `${toSquare}`;
+    }
+    return `${pieceSymbol}${captureSymbol}${toSquare}`;
+};
 
 export default function GamePage() {
-    const {id} = useParams<{ id: string }>();
+    const { id } = useParams<{ id: string }>();
     const [state, setState] = useState<number>(0);
-    const [game, setGame] = useState<GameInterface | null>(null);
+    const [game, setGame] = useState<{
+        title: string;
+        description: string;
+        fen_positions: string[];
+        moves: string[];
+    } | null>(null);
 
-    const handleNextButton = () => {
-        if (state < game!.fen_positions.length - 1) {
-            setState(prevState => (prevState + 1));
+    // Store previous FEN for reference (optional if needed)
+    const [previousFen, setPreviousFen] = useState<string>("");
+
+    // Analysis
+    const [possibleMoves, setPossibleMoves] = useState<{ moves: string[]; cp: number }[]>([]);
+    const [evaluation, setEvaluation] = useState<number>(0);
+
+    // FEN fields (extracted from Chess.js)
+    const [turn, setTurn] = useState<string>("w");
+    const [castlingRights, setCastlingRights] = useState<string>("KQkq");
+    const [enPassant, setEnPassant] = useState<string>("-");
+    const [halfMoveClock, setHalfMoveClock] = useState<number>(0);
+    const [fullMoveNumber, setFullMoveNumber] = useState<number>(1);
+    const [lastMove, setLastMove] = useState<string>("None");
+
+    // 1. Fetch the game data from your backend
+    useEffect(() => {
+        fetch(`http://127.0.0.1:8000/games/${id}`)
+            .then((response) => response.json())
+            .then((data) => setGame(data));
+    }, [id]);
+
+    // 2. Whenever `state` changes, update the board position
+    useEffect(() => {
+        if (game && game.fen_positions[state]) {
+            console.log(game.fen_positions[state])
+            updateGameState(game.fen_positions[state]);
         }
-    }
+    }, [state, game]);
+
+    // 3. Fetch best moves from Lichess
+    const fetchPossibleMoves = async (fen: string) => {
+        try {
+            const response = await fetch(`https://lichess.org/api/cloud-eval?fen=${fen}`);
+            const data = await response.json();
+
+            if (data.pvs) {
+                setPossibleMoves(
+                    data.pvs.map((pv: any) => ({
+                        moves: pv.moves.split(" "),
+                        cp: pv.cp || 0,
+                    }))
+                );
+                setEvaluation(data.pvs[0].cp);
+            } else {
+                setPossibleMoves([]);
+                setEvaluation(0);
+            }
+        } catch (error) {
+            console.error("❌ Failed to fetch possible moves:", error);
+            setPossibleMoves([]);
+            setEvaluation(0);
+        }
+    };
+
+    // 4. Navigation handlers
+    const handleNextButton = () => {
+        if (game && state < game.fen_positions.length - 1) {
+            setState((prevState) => prevState + 1);
+        }
+    };
 
     const handlePreviousButton = () => {
         if (state > 0) {
-            setState(prevState => (prevState - 1));
+            setState((prevState) => prevState - 1);
         }
-    }
+    };
 
-    useEffect(() => {
-        fetch(`http://127.0.0.1:8000/games/${id}`)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then((data) => setGame(data))
-    }, [id]);
+    // 5. Core state-updating function
+    const updateGameState = (position: string) => {
+        const chess = new Chess();
+        chess.load(position);
+
+        // Chess.js FEN has 6 parts: piecePlacement activeColor castling enPassant halfmove fullmove
+        const [placement, activeColor, castling, enPas, halfClock, fullMove] = chess
+            .fen()
+            .split(" ");
+
+        setTurn(activeColor);
+        setCastlingRights(castling || "-");
+        setEnPassant(enPas);
+        setHalfMoveClock(parseInt(halfClock));
+        setFullMoveNumber(parseInt(fullMove));
+
+        // Only update last move if we're beyond the first move
+        if (game && state > 0) {
+            setLastMove(game.moves[state - 1] || "None");
+        } else {
+            setLastMove("None");
+        }
+
+        // Keep track of the full FEN if you want
+        setPreviousFen(chess.fen());
+
+        // Fetch engine suggestions
+        fetchPossibleMoves(chess.fen());
+    };
 
     if (!game) {
-        return <Loading/>;
+        return <Loading />;
     }
 
+    // Evaluation bar logic
+    const evalHeight = Math.min(Math.max(50 - evaluation / 5, 0), 100);
+    const evalText = evaluation > 0 ? `+${(evaluation / 100).toFixed(2)}` : (evaluation / 100).toFixed(2);
+
     return (
-        <div className="w-full max-w-3xl mx-auto gap-4 mt-4 flex flex-col">
-            <h1 className="text-2xl ">Analyzing {game.title}</h1>
-            <div className="border border-gray-300 rounded flex flex-col items-center bg-gray-50 gap-4 p-4">
-                <MyChessboard position={game.fen_positions[state]}/>
+        <div className="w-screen h-screen flex flex-col items-center justify-center bg-[#121212] text-white p-6">
+            <h1 className="text-2xl font-bold">Analyzing {game.title}</h1>
+            <div className="flex flex-row justify-center items-start w-full h-full gap-6 p-6">
 
-                <div className="flex justify-center gap-2">
-                    <Button name="Previous" command={handlePreviousButton}/>
-                    <Button name="Suggest"/>
-                    <Button name="Next" command={handleNextButton}/>
+                {/* Evaluation bar & Chessboard */}
+                <div className="flex flex-row items-center gap-4">
+                    {/* Evaluation bar */}
+                    <div className="relative flex flex-col items-center w-10 self-start">
+                        <div className="relative w-6 h-[480px] rounded overflow-hidden border border-black">
+                            {/* Evaluation number */}
+                            <span
+                                className={`absolute left-1/2 transform -translate-x-1/2 px-1 rounded text-xs font-bold z-10 ${evaluation >= 0 ? "bottom-[2px] text-[#403D39] bg-white" : "top-[2px] text-white bg-black"
+                                    }`}
+                                style={{ backgroundColor: evaluation < 0 ? "#403d39" : "#ffffff" }}
+                            >
+                                {evalText}
+                            </span>
+                            {/* White portion */}
+                            <div
+                                className="absolute bottom-0 w-full bg-white transition-all duration-500"
+                                style={{ height: `${100 - evalHeight}%` }}
+                            />
+                            {/* Black portion */}
+                            <div
+                                className="absolute top-0 w-full bg-black transition-all duration-500"
+                                style={{ height: `${evalHeight}%`, backgroundColor: "#403d39" }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Board & Nav Buttons */}
+                    <div className="flex flex-col items-center gap-2">
+                        <MyChessboard
+                            position={game.fen_positions[state]}
+                            onMove={(newFen) => {
+                                // remove the setState increment!
+                                updateGameState(newFen);
+                            }}
+                        />
+
+                        {/* Navigation Buttons */}
+                        <div className="flex justify-center gap-2 mt-3 bg-[#2B2B2B] p-2 rounded-lg">
+                            <button
+                                onClick={() => setState(0)}
+                                className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
+                            >
+                                <FaStepBackward size={18} />
+                            </button>
+                            <button
+                                onClick={handlePreviousButton}
+                                className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
+                            >
+                                <FaBackward size={18} />
+                            </button>
+                            <button
+                                onClick={() => console.log("Play/Pause functionality")}
+                                className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
+                            >
+                                <FaPlay size={18} />
+                            </button>
+                            <button
+                                onClick={handleNextButton}
+                                className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
+                            >
+                                <FaForward size={18} />
+                            </button>
+                            <button
+                                onClick={() => setState(game.fen_positions.length - 1)}
+                                className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
+                            >
+                                <FaStepForward size={18} />
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div className="flex flex-col border border-gray-300 rounded gap-4 p-4">
-                <h2 className="text-xl font-bold mb-2">{game.title}</h2>
+                {/* Moves List & Possible Moves */}
+                <div className="flex flex-col gap-6 w-1/3">
+                    {/* Move list */}
+                    <div className="border border-gray-600 rounded-lg p-6 bg-[#2B2B2B] text-white max-h-96 overflow-y-auto">
+                        <h2 className="text-lg font-bold text-white mb-2">{game.title}</h2>
+                        <p className="text-sm text-gray-400 mb-4">{game.description}</p>
 
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    {game.description}
-                </p>
+                        {/* All Moves */}
+                        <div className="flex flex-col gap-2">
+                            {game.moves.reduce((result: React.ReactNode[], _, index, moves) => {
+                                if (index % 2 === 0) {
+                                    const boardWhite = fenToBoard(game.fen_positions[index]);
+                                    const whiteMove = convertMoveToChessNotation(moves[index], boardWhite);
 
-                <ul className="list-decimal list-inside space-y-1">
-                    {game.moves.map((move, index) => (
-                        <li key={index} className="text-sm">
-                            {move}
-                        </li>
-                    ))}
-                </ul>
-                <div className="ml-auto mt-auto p-2">
-                    <Button name="Export"/>
+                                    const blackMove = moves[index + 1]
+                                        ? convertMoveToChessNotation(
+                                            moves[index + 1],
+                                            fenToBoard(game.fen_positions[index + 1])
+                                        )
+                                        : "";
+
+                                    result.push(
+                                        <div key={index / 2} className="flex items-center bg-[#403d39] rounded p-2">
+                                            <span className="px-2 py-1 rounded text-sm font-bold text-white mr-2">
+                                                {index / 2 + 1}.
+                                            </span>
+                                            <span className="text-sm font-mono text-gray-200">
+                                                {whiteMove} {blackMove}
+                                            </span>
+                                        </div>
+                                    );
+                                }
+                                return result;
+                            }, [])}
+                        </div>
+
+                        <div className="mt-4">
+                            <Button name="Export" />
+                        </div>
+                    </div>
+
+                    {/* Possible / Engine Moves */}
+                    <div className="border border-gray-600 rounded-lg p-4 bg-[#2B2B2B] text-white">
+                        <div className="flex flex-col gap-2">
+                            {possibleMoves.map((move, index) => {
+                                const board = fenToBoard(game.fen_positions[state]);
+                                return (
+                                    <div key={index} className="flex flex-col bg-[#403d39] rounded p-2">
+                                        {/* Score Label */}
+                                        <span
+                                            className={`px-2 py-1 rounded text-sm font-bold mb-1 w-fit ${move.cp > 0 ? "bg-white text-[#403D39]" : "bg-black text-white"
+                                                }`}
+                                        >
+                                            {move.cp >= 0
+                                                ? `+${(move.cp / 100).toFixed(2)}`
+                                                : (move.cp / 100).toFixed(2)}
+                                        </span>
+                                        {/* Moves in Notation */}
+                                        <span className="text-sm font-mono text-gray-300">
+                                            {move.moves
+                                                .reduce((formattedMoves: string[], rawMove, i) => {
+                                                    const moveNotation = convertMoveToChessNotation(rawMove, board);
+                                                    if (i % 2 === 0) {
+                                                        formattedMoves.push(`${i / 2 + 1}.${moveNotation} `);
+                                                    } else {
+                                                        formattedMoves[formattedMoves.length - 1] += `${moveNotation} |`;
+                                                    }
+                                                    return formattedMoves;
+                                                }, [])
+                                                .join(" ")}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div className="flex justify-end ">
-                <Button name="Back"/>
             </div>
         </div>
     );
