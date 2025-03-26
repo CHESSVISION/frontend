@@ -109,6 +109,7 @@ export default function GamePage() {
     const fetchPossibleMoves = async (fen: string) => {
         try {
             const response = await fetch(`https://lichess.org/api/cloud-eval?fen=${fen}`);
+            console.log(fen)
             const data = await response.json();
 
             if (data.pvs) {
@@ -176,6 +177,9 @@ export default function GamePage() {
         fetchPossibleMoves(chess.fen());
     };
 
+    const handleEditButton = () => {
+
+    }
     if (!game) {
         return <Loading />;
     }
@@ -197,20 +201,20 @@ export default function GamePage() {
                             {/* Evaluation number */}
                             <span
                                 className={`absolute left-1/2 transform -translate-x-1/2 px-1 rounded text-xs font-bold z-10 ${evaluation >= 0 ? "bottom-[2px] text-[#403D39] bg-white" : "top-[2px] text-white bg-black"
-                                    }`}
-                                style={{ backgroundColor: evaluation < 0 ? "#403d39" : "#ffffff" }}
+                                }`}
+                                style={{backgroundColor: evaluation < 0 ? "#403d39" : "#ffffff"}}
                             >
                                 {evalText}
                             </span>
                             {/* White portion */}
                             <div
                                 className="absolute bottom-0 w-full bg-white transition-all duration-500"
-                                style={{ height: `${100 - evalHeight}%` }}
+                                style={{height: `${100 - evalHeight}%`}}
                             />
                             {/* Black portion */}
                             <div
                                 className="absolute top-0 w-full bg-black transition-all duration-500"
-                                style={{ height: `${evalHeight}%`, backgroundColor: "#403d39" }}
+                                style={{height: `${evalHeight}%`, backgroundColor: "#403d39"}}
                             />
                         </div>
                     </div>
@@ -231,31 +235,31 @@ export default function GamePage() {
                                 onClick={() => setState(0)}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaStepBackward size={18} />
+                                <FaStepBackward size={18}/>
                             </button>
                             <button
                                 onClick={handlePreviousButton}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaBackward size={18} />
+                                <FaBackward size={18}/>
                             </button>
                             <button
                                 onClick={() => console.log("Play/Pause functionality")}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaPlay size={18} />
+                                <FaPlay size={18}/>
                             </button>
                             <button
                                 onClick={handleNextButton}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaForward size={18} />
+                                <FaForward size={18}/>
                             </button>
                             <button
                                 onClick={() => setState(game.fen_positions.length - 1)}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaStepForward size={18} />
+                                <FaStepForward size={18}/>
                             </button>
                         </div>
                     </div>
@@ -264,8 +268,14 @@ export default function GamePage() {
                 {/* Moves List & Possible Moves */}
                 <div className="flex flex-col gap-6 w-1/3">
                     {/* Move list */}
-                    <div className="border border-gray-600 rounded-lg p-6 bg-[#2B2B2B] text-white max-h-96 overflow-y-auto">
-                        <h2 className="text-lg font-bold text-white mb-2">{game.title}</h2>
+                    <div
+                        className="border border-gray-600 rounded-lg p-6 bg-[#2B2B2B] text-white max-h-96 overflow-y-auto">
+                        <div className="flex justify-between gap-2">
+                            <h2 className="text-lg font-bold text-white mb-2">{game.title}</h2>
+                            <button onClick=>
+                                edit
+                            </button>
+                        </div>
                         <p className="text-sm text-gray-400 mb-4">{game.description}</p>
 
                         {/* All Moves */}
@@ -298,7 +308,7 @@ export default function GamePage() {
                         </div>
 
                         <div className="mt-4">
-                            <Button name="Export" />
+                            <Button name="Export"/>
                         </div>
                     </div>
 
@@ -312,7 +322,7 @@ export default function GamePage() {
                                         {/* Score Label */}
                                         <span
                                             className={`px-2 py-1 rounded text-sm font-bold mb-1 w-fit ${move.cp > 0 ? "bg-white text-[#403D39]" : "bg-black text-white"
-                                                }`}
+                                            }`}
                                         >
                                             {move.cp >= 0
                                                 ? `+${(move.cp / 100).toFixed(2)}`
