@@ -351,16 +351,16 @@ export default function GamePage() {
                             </button>
                         </div>
                         {/* New Suggestion Buttons */}
-                        <div className="flex justify-center gap-2">
+                        <div className="flex justify-center gap-2 mt-3 bg-[#2B2B2B] p-2 rounded-lg">
                             <button
                                 onClick={() => suggestMoveForColor("w")}
-                                className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
+                                className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
                                 Suggest White
                             </button>
                             <button
                                 onClick={() => suggestMoveForColor("b")}
-                                className="bg-red-600 text-white p-2 rounded hover:bg-red-700 transition"
+                                className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
                                 Suggest Black
                             </button>
