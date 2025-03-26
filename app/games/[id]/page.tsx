@@ -177,9 +177,47 @@ export default function GamePage() {
         fetchPossibleMoves(chess.fen());
     };
 
-    const handleEditButton = () => {
+    const [showEditForm, setShowEditForm] = useState(false);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
 
+    const handleEditButton = () => {
+        if (game) {
+            setEditTitle(game.title);
+            setEditDescription(game.description);
+            setShowEditForm(true);
+        }
+    };
+
+    const updateGame = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/games/${id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    title: editTitle,
+                    description: editDescription,
+                }),
+            });
+            const data = await response.json();
+            if (game) {
+                setGame({ ...game, title: data.title, description: data.description });
+            } else {
+                // Optionally, initialize game with complete data if available
+                setGame({
+                    title: data.title,
+                    description: data.description,
+                    fen_positions: data.fen_positions || [],
+                    moves: data.moves || [],
+                });
+            }
+        } catch (error) {
+            console.error("❌ Failed to fetch possible moves:", error);
+        }
     }
+
     if (!game) {
         return <Loading />;
     }
@@ -190,6 +228,49 @@ export default function GamePage() {
 
     return (
         <div className="w-screen h-screen flex flex-col items-center justify-center bg-[#121212] text-white p-6">
+            <div>
+                {showEditForm && (
+                    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+                        <div className="bg-[#2B2B2B] text-white p-6 rounded-lg w-96 shadow-lg">
+                            <h2 className="text-lg font-bold mb-4">Edit Game Info</h2>
+
+                            <label className="block mb-2 text-sm">Title</label>
+                            <input
+                                className="w-full p-2 mb-4 rounded bg-[#3C3C3C] text-white"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                            />
+
+                            <label className="block mb-2 text-sm">Description</label>
+                            <input
+                                className="w-full p-2 mb-4 rounded bg-[#3C3C3C] text-white"
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                            />
+
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                                    onClick={() => setShowEditForm(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                                    onClick={() => {
+                                        console.log("Saving:", editTitle, editDescription);
+                                        updateGame()
+                                        setShowEditForm(false);
+                                    }}
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+            </div>
             <h1 className="text-2xl font-bold">Analyzing {game.title}</h1>
             <div className="flex flex-row justify-center items-start w-full h-full gap-6 p-6">
 
@@ -272,7 +353,7 @@ export default function GamePage() {
                         className="border border-gray-600 rounded-lg p-6 bg-[#2B2B2B] text-white max-h-96 overflow-y-auto">
                         <div className="flex justify-between gap-2">
                             <h2 className="text-lg font-bold text-white mb-2">{game.title}</h2>
-                            <button onClick=>
+                            <button onClick={handleEditButton}>
                                 edit
                             </button>
                         </div>
