@@ -64,7 +64,21 @@ const convertMoveToChessNotation = (move: string, board: string[][]): string => 
     // Normal piece move
     return `${pieceSymbol}${captureSymbol}${toSquare}`;
 };
-
+const normalizeFen = (fen: string): string => {
+    if (!fen) return "start";
+    const fields = fen.trim().split(" ");
+    if (fields.length === 1) {
+        return `${fields[0]} w KQkq - 0 1`;
+    }
+    while (fields.length < 6) {
+        if (fields.length === 1) fields.push("w");
+        else if (fields.length === 2) fields.push("KQkq");
+        else if (fields.length === 3) fields.push("-");
+        else if (fields.length === 4) fields.push("0");
+        else if (fields.length === 5) fields.push("1");
+    }
+    return fields.join(" ");
+};
 
 export default function GamePage() {
     const { id } = useParams<{ id: string }>();
@@ -95,12 +109,20 @@ export default function GamePage() {
     useEffect(() => {
         fetch(`http://127.0.0.1:8000/games/${id}`)
             .then((response) => response.json())
-            .then((data) => setGame(data));
+            .then((data) => {
+                setGame(data);
+                if (data.fen_positions && data.fen_positions.length > 0) {
+                    const firstFen = normalizeFen(data.fen_positions[0]);
+                    setPreviousFen(firstFen);
+                    updateGameState(firstFen);
+                }
+            });
     }, [id]);
 
     // 2. Whenever `state` changes, update the board position
     useEffect(() => {
         if (game && game.fen_positions[state]) {
+            setPossibleMoves([])
             console.log(game.fen_positions[state])
             updateGameState(game.fen_positions[state]);
         }
@@ -109,7 +131,7 @@ export default function GamePage() {
     const fetchPossibleMoves = async (fen: string) => {
         try {
             const response = await fetch(`https://lichess.org/api/cloud-eval?fen=${fen}`);
-            console.log(fen)
+            console.log("suggest position: ", fen)
             const data = await response.json();
 
             if (data.pvs) {
@@ -134,6 +156,15 @@ export default function GamePage() {
     };
 
 
+    const suggestMoveForColor = (color: "w" | "b") => {
+        if (!previousFen) return;
+        const fenFields = previousFen.split(" ");
+        fenFields[1] = color; // override the active color
+        const fenForSuggestion = fenFields.join(" ");
+        console.log("Suggesting moves for", color, "with FEN:", fenForSuggestion);
+        fetchPossibleMoves(fenForSuggestion);
+    };
+
     // 4. Navigation handlers
     const handleNextButton = () => {
         if (game && state < game.fen_positions.length - 1) {
@@ -149,32 +180,8 @@ export default function GamePage() {
 
     // 5. Core state-updating function
     const updateGameState = (position: string) => {
-        const chess = new Chess();
-        chess.load(position);
-
-        // Chess.js FEN has 6 parts: piecePlacement activeColor castling enPassant halfmove fullmove
-        const [placement, activeColor, castling, enPas, halfClock, fullMove] = chess
-            .fen()
-            .split(" ");
-
-        setTurn(activeColor);
-        setCastlingRights(castling || "-");
-        setEnPassant(enPas);
-        setHalfMoveClock(parseInt(halfClock));
-        setFullMoveNumber(parseInt(fullMove));
-
-        // Only update last move if we're beyond the first move
-        if (game && state > 0) {
-            setLastMove(game.moves[state - 1] || "None");
-        } else {
-            setLastMove("None");
-        }
-
-        // Keep track of the full FEN if you want
-        setPreviousFen(chess.fen());
-
-        // Fetch engine suggestions
-        fetchPossibleMoves(chess.fen());
+        setPreviousFen(position)
+        // fetchPossibleMoves(position.split(" ")[0]);
     };
 
     const [showEditForm, setShowEditForm] = useState(false);
@@ -282,20 +289,20 @@ export default function GamePage() {
                             {/* Evaluation number */}
                             <span
                                 className={`absolute left-1/2 transform -translate-x-1/2 px-1 rounded text-xs font-bold z-10 ${evaluation >= 0 ? "bottom-[2px] text-[#403D39] bg-white" : "top-[2px] text-white bg-black"
-                                }`}
-                                style={{backgroundColor: evaluation < 0 ? "#403d39" : "#ffffff"}}
+                                    }`}
+                                style={{ backgroundColor: evaluation < 0 ? "#403d39" : "#ffffff" }}
                             >
                                 {evalText}
                             </span>
                             {/* White portion */}
                             <div
                                 className="absolute bottom-0 w-full bg-white transition-all duration-500"
-                                style={{height: `${100 - evalHeight}%`}}
+                                style={{ height: `${100 - evalHeight}%` }}
                             />
                             {/* Black portion */}
                             <div
                                 className="absolute top-0 w-full bg-black transition-all duration-500"
-                                style={{height: `${evalHeight}%`, backgroundColor: "#403d39"}}
+                                style={{ height: `${evalHeight}%`, backgroundColor: "#403d39" }}
                             />
                         </div>
                     </div>
@@ -316,33 +323,49 @@ export default function GamePage() {
                                 onClick={() => setState(0)}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaStepBackward size={18}/>
+                                <FaStepBackward size={18} />
                             </button>
                             <button
                                 onClick={handlePreviousButton}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaBackward size={18}/>
+                                <FaBackward size={18} />
                             </button>
                             <button
                                 onClick={() => console.log("Play/Pause functionality")}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaPlay size={18}/>
+                                <FaPlay size={18} />
                             </button>
                             <button
                                 onClick={handleNextButton}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaForward size={18}/>
+                                <FaForward size={18} />
                             </button>
                             <button
                                 onClick={() => setState(game.fen_positions.length - 1)}
                                 className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
                             >
-                                <FaStepForward size={18}/>
+                                <FaStepForward size={18} />
                             </button>
                         </div>
+                        {/* New Suggestion Buttons */}
+                        <div className="flex justify-center gap-2 mt-3 bg-[#2B2B2B] p-2 rounded-lg">
+                            <button
+                                onClick={() => suggestMoveForColor("w")}
+                                className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
+                            >
+                                Suggest White
+                            </button>
+                            <button
+                                onClick={() => suggestMoveForColor("b")}
+                                className="bg-[#3C3C3C] text-white p-3 rounded-lg hover:bg-[#5C5C5C] transition"
+                            >
+                                Suggest Black
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
@@ -389,7 +412,7 @@ export default function GamePage() {
                         </div>
 
                         <div className="mt-4">
-                            <Button name="Export"/>
+                            <Button name="Export" />
                         </div>
                     </div>
 
@@ -400,16 +423,14 @@ export default function GamePage() {
                                 const board = fenToBoard(game.fen_positions[state]);
                                 return (
                                     <div key={index} className="flex flex-col bg-[#403d39] rounded p-2">
-                                        {/* Score Label */}
                                         <span
                                             className={`px-2 py-1 rounded text-sm font-bold mb-1 w-fit ${move.cp > 0 ? "bg-white text-[#403D39]" : "bg-black text-white"
-                                            }`}
+                                                }`}
                                         >
                                             {move.cp >= 0
                                                 ? `+${(move.cp / 100).toFixed(2)}`
                                                 : (move.cp / 100).toFixed(2)}
                                         </span>
-                                        {/* Moves in Notation */}
                                         <span className="text-sm font-mono text-gray-300">
                                             {move.moves
                                                 .reduce((formattedMoves: string[], rawMove, i) => {
