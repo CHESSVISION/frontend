@@ -1,79 +1,119 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
+/**
+ * Converts a FEN string (piece placement only) into an object mapping squares to piece codes.
+ * For example, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR" becomes:
+ * { a8: "bR", b8: "bN", …, a1: "wR", … }
+ */
+function fenToBoardState(fen) {
+  const boardState = {};
+  // We only need the piece placement portion if a full FEN is provided.
+  const placement = fen.split(" ")[0];
+  const rows = placement.split("/");
+  // Row index 0 corresponds to rank 8, index 7 to rank 1.
+  for (let i = 0; i < rows.length; i++) {
+    let file = 0;
+    for (const char of rows[i]) {
+      if (/\d/.test(char)) {
+        file += parseInt(char, 10);
+      } else {
+        const square = String.fromCharCode("a".charCodeAt(0) + file) + (8 - i);
+        // Uppercase letters represent White pieces, lowercase represent Black.
+        const color = char === char.toUpperCase() ? "w" : "b";
+        boardState[square] = color + char.toUpperCase();
+        file++;
+      }
+    }
+  }
+  return boardState;
+}
+
+/**
+ * Converts a board state object into a FEN string.
+ * Defaults are provided for active color, castling, en passant, half-move clock, and full move number.
+ */
+function boardStateToFen(
+  boardState,
+  activeColor = "w",
+  castling = "KQkq",
+  enPassant = "-",
+  halfMoveClock = 0,
+  fullMoveNumber = 1
+) {
+  const fenRows = [];
+  // Process each rank from 8 to 1.
+  for (let rank = 8; rank >= 1; rank--) {
+    let emptyCount = 0;
+    let fenRow = "";
+    for (let file = 0; file < 8; file++) {
+      const square = String.fromCharCode("a".charCodeAt(0) + file) + rank;
+      const piece = boardState[square];
+      if (piece) {
+        if (emptyCount > 0) {
+          fenRow += emptyCount;
+          emptyCount = 0;
+        }
+        // The piece is stored as e.g. "wK". In FEN, white is uppercase, black is lowercase.
+        let fenChar = piece[1];
+        fenChar = piece[0] === "w" ? fenChar.toUpperCase() : fenChar.toLowerCase();
+        fenRow += fenChar;
+      } else {
+        emptyCount++;
+      }
+    }
+    if (emptyCount > 0) {
+      fenRow += emptyCount;
+    }
+    fenRows.push(fenRow);
+  }
+  const piecePlacement = fenRows.join("/");
+  return `${piecePlacement} ${activeColor} ${castling} ${enPassant} ${halfMoveClock} ${fullMoveNumber}`;
+}
+
 export default function MyChessboard({ position, onMove }) {
-  const [game, setGame] = useState(new Chess());
+  // Initialize board state using the provided FEN position.
+  const [boardState, setBoardState] = useState(() =>
+    position
+      ? fenToBoardState(position)
+      : fenToBoardState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+  );
 
-  /**
-   * Normalize a FEN string to ensure it has all 6 fields.
-   * For example, if you get a partial FEN without castling or en-passant fields, this fills them in.
-   */
-  const normalizeFen = (fen) => {
-    if (!fen) return "start"; // Default to initial board if empty
-    let fields = fen.trim().split(" ");
-    while (fields.length < 6) {
-      fields.push("-"); // Fill missing fields
-    }
-    return fields.join(" ");
-  };
-
-  /**
-   * Example function that can modify or log FEN fields if needed.
-   * This function is optional – it just shows how you might intercept castling or special moves
-   * and update the FEN string or track logs.
-   */
-  const updateFenFields = (fen, lastMove) => {
-    const newGame = new Chess(fen);
-    const updatedFen = newGame.fen();
-
-    // Simple example: if the SAN notation shows castling, log that it happened
-    if (lastMove.includes("O-O") || lastMove.includes("O-O-O")) {
-      console.log("♜ Castling detected. Updating FEN fields if necessary.");
-    }
-
-    console.log("🔄 Board Updated - FEN:", updatedFen);
-    return updatedFen;
-  };
-
-  /**
-   * Whenever `position` (a FEN) is passed from the parent,
-   * load that position into our local game state.
-   */
+  // When the `position` prop changes (e.g., via navigation), update the board state.
   useEffect(() => {
     if (position) {
-      try {
-        const validFen = normalizeFen(position);
-        setGame(new Chess(validFen));
-      } catch (error) {
-        console.error("Invalid FEN provided:", position, error);
-      }
+      const newBoard = fenToBoardState(position);
+      setBoardState(newBoard);
+      const newFen = boardStateToFen(newBoard);
+      console.log("Board Updated via navigation - FEN:", newFen);
     }
   }, [position]);
 
   /**
-   * Called by react-chessboard on a successful piece drop from square `from` to square `to`.
+   * Handles a piece drop by updating the board state without checking move legality.
+   * After moving, it converts the board state to a FEN string, logs it, and calls the onMove callback.
    */
   const handleMove = (from, to) => {
-    // Clone our existing position
-    const newGame = new Chess(game.fen());
-    // Attempt to make the move in Chess.js
-    const move = newGame.move({ from, to });
-
-    if (move) {
-      // If the move is valid, update the local game and notify the parent
-      const updatedFen = updateFenFields(newGame.fen(), move.san);
-      setGame(new Chess(updatedFen));
-      // onMove callback notifies the parent component (page.tsx) of the new FEN
-      onMove(updatedFen);
-    }
+    setBoardState((prevState) => {
+      const newState = { ...prevState };
+      if (newState[from]) {
+        newState[to] = newState[from];
+        delete newState[from];
+      }
+      const newFen = boardStateToFen(newState);
+      console.log("Board Updated via move - FEN:", newFen);
+      if (onMove) onMove(newFen);
+      return newState;
+    });
+    // Return true to indicate the move has been handled.
+    return true;
   };
 
   return (
     <div className="w-full max-w-xl">
       <Chessboard
-        position={game.fen()}
+        position={boardState}
         onPieceDrop={(from, to) => handleMove(from, to)}
         customBoardStyle={{
           width: "480px",
