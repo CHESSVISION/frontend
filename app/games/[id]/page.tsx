@@ -377,7 +377,7 @@ export default function GamePage() {
                         <div className="flex justify-between gap-2">
                             <h2 className="text-lg font-bold text-white mb-2">{game.title}</h2>
                             <button onClick={handleEditButton}>
-                                edit
+                                Edit
                             </button>
                         </div>
                         <p className="text-sm text-gray-400 mb-4">{game.description}</p>
