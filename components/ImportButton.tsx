@@ -64,7 +64,7 @@ const ImportButton: React.FC = () => {
                     alt="Import Icon"
                     width={18}
                     height={18}
-                    className="dark:invert"
+                    className="text-black dark:text-white"
                 />
                 {uploading ? "Uploading..." : "Import Now"}
             </button>
