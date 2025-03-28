@@ -7,78 +7,7 @@ import MyChessboard from "@/components/Chessboard";
 import Loading from "@/app/loading";
 import { FaStepBackward, FaStepForward, FaPlay, FaBackward, FaForward } from "react-icons/fa";
 import { Chess } from "chess.js";
-
-// Helper map for chess pieces
-const pieceSymbols: Record<string, string> = {
-    p: "", // Pawn
-    n: "♘",
-    b: "♗",
-    r: "♖",
-    q: "♕",
-    k: "♔",
-    P: "",
-    N: "♞",
-    B: "♝",
-    R: "♜",
-    Q: "♛",
-    K: "♚",
-};
-
-// Convert FEN to a 2D board array
-const fenToBoard = (fen: string): string[][] => {
-    const rows = fen.split(" ")[0].split("/");
-    return rows.map((row) =>
-        row
-            .replace(/\d/g, (digit) => " ".repeat(parseInt(digit)))
-            .split("")
-    );
-};
-
-const convertMoveToChessNotation = (move: string, board: string[][]): string => {
-    const fromFile = move.charCodeAt(0) - "a".charCodeAt(0);
-    const fromRank = 8 - parseInt(move[1]);
-    const toFile = move.charCodeAt(2) - "a".charCodeAt(0);
-    const toRank = 8 - parseInt(move[3]);
-
-    const piece = board[fromRank][fromFile];
-    const toSquare = move.slice(2, 4);
-
-    // 🏰 Castling logic FIRST (before looking at captures)
-    if (piece === 'K' && (move === 'e1h1' || move === 'e1g1')) return 'O-O';
-    if (piece === 'K' && (move === 'e1a1' || move === 'e1c1')) return 'O-O-O';
-    if (piece === 'k' && (move === 'e8h8' || move === 'e8g8')) return 'O-O';
-    if (piece === 'k' && (move === 'e8a8' || move === 'e8c8')) return 'O-O-O';
-
-    const targetPiece = board[toRank][toFile];
-    const pieceSymbol = pieceSymbols[piece] || "";
-    const captureSymbol = targetPiece.trim() !== "" ? "x" : "";
-
-    // ♟️ Pawn moves
-    if (pieceSymbol === "") {
-        if (captureSymbol) {
-            return `${move[0]}x${toSquare}`;
-        }
-        return `${toSquare}`;
-    }
-
-    // Normal piece move
-    return `${pieceSymbol}${captureSymbol}${toSquare}`;
-};
-const normalizeFen = (fen: string): string => {
-    if (!fen) return "start";
-    const fields = fen.trim().split(" ");
-    if (fields.length === 1) {
-        return `${fields[0]} w KQkq - 0 1`;
-    }
-    while (fields.length < 6) {
-        if (fields.length === 1) fields.push("w");
-        else if (fields.length === 2) fields.push("KQkq");
-        else if (fields.length === 3) fields.push("-");
-        else if (fields.length === 4) fields.push("0");
-        else if (fields.length === 5) fields.push("1");
-    }
-    return fields.join(" ");
-};
+import {pieceSymbols, fenToBoard, convertMoveToChessNotation, normalizeFen} from "@/app/games/[id]/utils";
 
 export default function GamePage() {
     const { id } = useParams<{ id: string }>();
@@ -96,14 +25,6 @@ export default function GamePage() {
     // Analysis
     const [possibleMoves, setPossibleMoves] = useState<{ moves: string[]; cp: number }[]>([]);
     const [evaluation, setEvaluation] = useState<number>(0);
-
-    // FEN fields (extracted from Chess.js)
-    const [turn, setTurn] = useState<string>("w");
-    const [castlingRights, setCastlingRights] = useState<string>("KQkq");
-    const [enPassant, setEnPassant] = useState<string>("-");
-    const [halfMoveClock, setHalfMoveClock] = useState<number>(0);
-    const [fullMoveNumber, setFullMoveNumber] = useState<number>(1);
-    const [lastMove, setLastMove] = useState<string>("None");
 
     // 1. Fetch the game data from your backend
     useEffect(() => {
@@ -385,27 +306,30 @@ export default function GamePage() {
                         {/* All Moves */}
                         <div className="flex flex-col gap-2">
                             {game.moves.reduce((result: React.ReactNode[], _, index, moves) => {
-                                if (index % 2 === 0) {
-                                    const boardWhite = fenToBoard(game.fen_positions[index]);
-                                    const whiteMove = convertMoveToChessNotation(moves[index], boardWhite);
+                                try {
+                                    if (index % 2 === 0) {
+                                        const boardWhite = fenToBoard(game.fen_positions[index]);
+                                        const whiteMove = convertMoveToChessNotation(moves[index], boardWhite);
 
-                                    const blackMove = moves[index + 1]
-                                        ? convertMoveToChessNotation(
-                                            moves[index + 1],
-                                            fenToBoard(game.fen_positions[index + 1])
-                                        )
-                                        : "";
+                                        const blackMove = moves[index + 1]
+                                            ? convertMoveToChessNotation(
+                                                moves[index + 1],
+                                                fenToBoard(game.fen_positions[index + 1])
+                                            )
+                                            : "";
 
-                                    result.push(
-                                        <div key={index / 2} className="flex items-center bg-[#403d39] rounded p-2">
-                                            <span className="px-2 py-1 rounded text-sm font-bold text-white mr-2">
-                                                {index / 2 + 1}.
-                                            </span>
-                                            <span className="text-sm font-mono text-gray-200">
-                                                {whiteMove} {blackMove}
-                                            </span>
-                                        </div>
-                                    );
+                                        result.push(
+                                            <div key={index / 2} className="flex items-center bg-[#403d39] rounded p-2">
+                                                <span className="px-2 py-1 rounded text-sm font-bold text-white mr-2">
+                                                    {index / 2 + 1}.
+                                                </span>
+                                                <span className="text-sm font-mono text-gray-200">
+                                                    {whiteMove} {blackMove}
+                                                </span>
+                                            </div>
+                                        );
+                                    }
+                                } catch {
                                 }
                                 return result;
                             }, [])}
