@@ -34,7 +34,7 @@ export default function NavBar() {
                 {/* Right: Nav links */}
                 <div className="flex items-center space-x-6">
                     <Link
-                        href="/"
+                        href="/games"
                         className="text-white text-sm hover:text-[#FDBF2C] transition"
                     >
                         Game
