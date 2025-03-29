@@ -150,6 +150,40 @@ export default function GamePage() {
         return <Loading />;
     }
 
+    const handleExport = () => {
+        if (!game) return;
+    
+        const movesText = game.moves.reduce((result: string[], _, index, moves) => {
+            try {
+                if (index % 2 === 0) {
+                    const boardWhite = fenToBoard(game.fen_positions[index]);
+                    const whiteMove = convertMoveToChessNotation(moves[index], boardWhite);
+    
+                    const blackMove = moves[index + 1]
+                        ? convertMoveToChessNotation(
+                            moves[index + 1],
+                            fenToBoard(game.fen_positions[index + 1])
+                        )
+                        : "";
+    
+                    result.push(`${index / 2 + 1}. ${whiteMove} ${blackMove}`);
+                }
+            } catch {}
+            return result;
+        }, []).join('\n');
+    
+        const blob = new Blob([movesText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${game.title || "chess_game"}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+    
+
     // Evaluation bar logic
     const evalHeight = Math.min(Math.max(50 - evaluation / 5, 0), 100);
     const evalText = evaluation > 0 ? `+${(evaluation / 100).toFixed(2)}` : (evaluation / 100).toFixed(2);
@@ -336,7 +370,11 @@ export default function GamePage() {
                         </div>
 
                         <div className="mt-4">
-                            <Button name="Export" />
+                        <button onClick={handleExport}
+                                className="bg-[#3C3C3C] hover:bg-[#5C5C5C] text-white px-4 py-2 rounded-lg transition"
+                        >
+                        Export
+                            </button>
                         </div>
                     </div>
 
