@@ -72,7 +72,7 @@ const ImportButton: React.FC = () => {
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="video/*"
+                accept="video/*, image/*"
                 className="hidden"
                 onChange={handleFileChange}
             />
