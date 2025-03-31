@@ -27,7 +27,7 @@ const ImportButton: React.FC = () => {
             setError(null);
             setSuccess(null);
 
-            const response = await fetch("http://127.0.0.1:8000/games", {
+            const response = await fetch("http://35.232.235.246:8000/games", {
                 method: "POST",
                 body: formData,
             });
