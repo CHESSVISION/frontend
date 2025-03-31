@@ -28,7 +28,7 @@ export default function GamePage() {
 
     // 1. Fetch the game data from your backend
     useEffect(() => {
-        fetch(`http://127.0.0.1:8000/games/${id}`)
+        fetch(`http://35.232.235.246:8000/games/${id}`)
             .then((response) => response.json())
             .then((data) => {
                 setGame(data);
