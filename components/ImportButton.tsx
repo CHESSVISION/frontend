@@ -13,6 +13,7 @@ const ImportButton: React.FC = () => {
     const handleButtonClick = () => {
         fileInputRef.current?.click();
     };
+    const server_url = process.env.NEXT_PUBLIC_SERVER_URL;
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -27,7 +28,7 @@ const ImportButton: React.FC = () => {
             setError(null);
             setSuccess(null);
 
-            const response = await fetch("http://35.232.235.246:8000/games", {
+            const response = await fetch(`${server_url}/games`, {
                 method: "POST",
                 body: formData,
             });

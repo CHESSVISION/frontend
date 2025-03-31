@@ -6,9 +6,10 @@ import GameInterface from "@/interfaces/GameInterface";
 
 export default async function GamesPage() {
     let games: GameInterface[] | null = null;
+    const local_url = process.env.LOCAL_URL
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/games");
+        const response = await fetch(`${local_url}/games`);
         games = await response.json();
     } catch (err) {
         console.error("Failed to fetch games:", err);

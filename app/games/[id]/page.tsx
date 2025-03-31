@@ -26,9 +26,11 @@ export default function GamePage() {
     const [possibleMoves, setPossibleMoves] = useState<{ moves: string[]; cp: number }[]>([]);
     const [evaluation, setEvaluation] = useState<number>(0);
 
+    const server_url = process.env.NEXT_PUBLIC_SERVER_URL;
     // 1. Fetch the game data from your backend
     useEffect(() => {
-        fetch(`http://35.232.235.246:8000/games/${id}`)
+        console.log(server_url);
+        fetch(`${server_url}/games/${id}`)
             .then((response) => response.json())
             .then((data) => {
                 setGame(data);
